@@ -7,7 +7,7 @@ import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChang
 // BLOCO 1: CONFIGURAÇÕES E DADOS BASE
 // ============================================================================
 
-const apiKey = ""; // A chave é injetada automaticamente pelo ambiente
+const apiKey = ""; // A chave do Gemini é injetada automaticamente
 
 // --- SETUP FIREBASE AUTH ---
 const firebaseConfig = {
@@ -21,7 +21,17 @@ const firebaseConfig = {
 };
 let auth, provider;
 try {
-  const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+  // ATENÇÃO MÁRIO: Quando colocar as suas chaves do Firebase, coloque-as aqui dentro
+  const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+    // Exemplo de como devem ficar as suas chaves (remova os // e preencha):
+    // apiKey: "AIzaSy...",
+    // authDomain: "frutario-app.firebaseapp.com",
+    // projectId: "frutario-app",
+    // storageBucket: "frutario-app.appspot.com",
+    // messagingSenderId: "123456789",
+    // appId: "1:123456789:web:abcde"
+  };
+  
   if (Object.keys(firebaseConfig).length > 0) {
     const app = initializeApp(firebaseConfig);
     auth = getAuth(app);
@@ -31,6 +41,7 @@ try {
   console.error("Erro ao inicializar Firebase", e);
 }
 
+// OS DOIS ÚNICOS EMAILS COM PERMISSÃO:
 const ALLOWED_ADMINS = ['mightyrem@gmail.com', 'hmtuga@gmail.com'];
 
 // --- FUNÇÃO GEMINI API ---
@@ -229,6 +240,22 @@ const AboutModal = memo(({ onClose }) => (
   </div>
 ));
 
+const Footer = memo(() => (
+  <footer className="bg-[#14532D] text-[#FFFCF2] py-10 mt-12 border-t-4 border-[#84CC16]">
+    <div className="max-w-4xl mx-auto px-4 flex flex-col md:flex-row gap-8 items-center md:items-start justify-between">
+      <div className="flex-1 text-center md:text-left space-y-6">
+        <div className="flex items-center justify-center md:justify-start gap-2 text-[#84CC16] mb-2"><Store size={28} /><h3 className="font-heading text-2xl text-[#FFFCF2]">A Nossa Banca</h3></div>
+        <div className="flex items-start gap-3 justify-center md:justify-start"><MapPin className="text-[#EA580C] shrink-0 mt-1" size={20} /><div className="text-left"><p className="font-bold text-lg">Mercado Municipal da Costa da Caparica</p><p className="text-sm opacity-90 mt-0.5">Praça da Liberdade, 2825-355 Costa da Caparica</p></div></div>
+        <div className="flex items-start gap-3 justify-center md:justify-start"><Clock className="text-[#EA580C] shrink-0 mt-1" size={20} /><div className="text-left"><p className="font-bold text-lg">Horário ao Público</p><p className="text-sm opacity-90 mt-0.5">Terça a Domingo, 07h00 - 14h00</p><p className="text-sm text-[#84CC16] font-semibold mt-0.5">(Encerrado à segunda-feira)</p></div></div>
+      </div>
+      <div className="w-full md:w-1/2 h-56 rounded-2xl overflow-hidden border-2 border-[#84CC16]/30 shadow-lg">
+        <iframe width="100%" height="100%" frameBorder="0" scrolling="no" marginHeight="0" marginWidth="0" src="https://maps.google.com/maps?q=Mercado%20Municipal%20da%20Costa%20da%20Caparica,%20Pra%C3%A7a%20da%20Liberdade&t=&z=15&ie=UTF8&iwloc=&output=embed" title="Localização"></iframe>
+      </div>
+    </div>
+    <div className="max-w-4xl mx-auto px-4 mt-8 pt-4 border-t border-[#FFFCF2]/10 text-center text-xs opacity-60">© {new Date().getFullYear()} Frutário - Frutas do Mário. Todos os direitos reservados.</div>
+  </footer>
+));
+
 const ProductCard = memo(({ product, onAddToCart }) => {
   const n = product.name.toLowerCase();
   const isMelonOrWatermelon = n.includes('melancia') || n.includes('melão') || n.includes('meloa');
@@ -406,6 +433,7 @@ const CartView = memo(({ cart, total, setView, onRemove }) => {
           <span className="text-xs text-[#451A03]/50 text-right mt-1">* Valor sujeito a acerto de pesagem</span>
         </div>
       </div>
+      
       <div className="bg-white border border-[#EA580C]/20 p-5 rounded-2xl mb-6 shadow-sm">
         <div className="flex items-center gap-3 mb-4"><div className="bg-[#EA580C]/10 p-2.5 rounded-full text-[#EA580C]"><ChefHat size={24} /></div><div><h3 className="font-bold text-[#EA580C]">O Chef Mário sugere...</h3><p className="text-sm text-[#451A03]/70">Sem ideias para o que fazer com estas frutas?</p></div></div>
         {recipe ? <div className="bg-[#FFFCF2] p-4 rounded-xl text-[#451A03] text-sm whitespace-pre-line border border-[#EA580C]/10">{recipe}</div> : <button onClick={generateRecipe} disabled={loadingRecipe} className="w-full bg-[#EA580C] hover:bg-[#c2410c] disabled:bg-[#EA580C]/50 text-white py-2.5 rounded-xl font-semibold transition flex items-center justify-center gap-2 shadow-sm"><Sparkles size={18} />{loadingRecipe ? 'A preparar a sugestão...' : '✨ Descobrir Receita Mágica'}</button>}
@@ -506,55 +534,6 @@ const SuccessView = memo(({ setView }) => (
   </div>
 ));
 
-// --- COMPONENTE RODAPÉ (NOVO) ---
-const Footer = memo(() => (
-  <footer className="bg-[#14532D] text-[#FFFCF2] py-10 mt-12 border-t-4 border-[#84CC16]">
-    <div className="max-w-4xl mx-auto px-4 flex flex-col md:flex-row gap-8 items-center md:items-start justify-between">
-      
-      <div className="flex-1 text-center md:text-left space-y-6">
-        <div className="flex items-center justify-center md:justify-start gap-2 text-[#84CC16] mb-2">
-          <Store size={28} />
-          <h3 className="font-heading text-2xl text-[#FFFCF2]">A Nossa Banca</h3>
-        </div>
-        
-        <div className="flex items-start gap-3 justify-center md:justify-start">
-          <MapPin className="text-[#EA580C] shrink-0 mt-1" size={20} />
-          <div className="text-left">
-            <p className="font-bold text-lg">Mercado Municipal da Costa da Caparica</p>
-            <p className="text-sm opacity-90 mt-0.5">Praça da Liberdade, 2825-355 Costa da Caparica</p>
-          </div>
-        </div>
-
-        <div className="flex items-start gap-3 justify-center md:justify-start">
-          <Clock className="text-[#EA580C] shrink-0 mt-1" size={20} />
-          <div className="text-left">
-            <p className="font-bold text-lg">Horário ao Público</p>
-            <p className="text-sm opacity-90 mt-0.5">Terça a Domingo, 07h00 - 14h00</p>
-            <p className="text-sm text-[#84CC16] font-semibold mt-0.5">(Encerrado à segunda-feira)</p>
-          </div>
-        </div>
-      </div>
-
-      <div className="w-full md:w-1/2 h-56 rounded-2xl overflow-hidden border-2 border-[#84CC16]/30 shadow-lg">
-        <iframe 
-          width="100%" 
-          height="100%" 
-          frameBorder="0" 
-          scrolling="no" 
-          marginHeight="0" 
-          marginWidth="0" 
-          src="https://maps.google.com/maps?q=Mercado%20Municipal%20da%20Costa%20da%20Caparica,%20Pra%C3%A7a%20da%20Liberdade&t=&z=15&ie=UTF8&iwloc=&output=embed"
-          title="Localização Mercado Municipal"
-        ></iframe>
-      </div>
-      
-    </div>
-    <div className="max-w-4xl mx-auto px-4 mt-8 pt-4 border-t border-[#FFFCF2]/10 text-center text-xs opacity-60">
-      © {new Date().getFullYear()} Frutário - Frutas do Mário. Todos os direitos reservados.
-    </div>
-  </footer>
-));
-
 const AdminProductsView = memo(({ products, setProducts }) => {
   const [promoText, setPromoText] = useState({});
   const [loadingPromo, setLoadingPromo] = useState({});
@@ -653,20 +632,45 @@ export default function App() {
 
   useEffect(() => {
     if (!auth) return;
-    const unsubscribe = onAuthStateChanged(auth, setUser);
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      // Dupla verificação de segurança: Se um intruso tiver um cookie guardado, é ejetado!
+      if (currentUser && !ALLOWED_ADMINS.includes(currentUser.email)) {
+        signOut(auth);
+        setUser(null);
+      } else {
+        setUser(currentUser);
+      }
+    });
     return () => unsubscribe();
   }, []);
 
   const isAdmin = useMemo(() => user && ALLOWED_ADMINS.includes(user.email), [user]);
 
   const handleLogin = useCallback(async () => {
-    if (!auth || window.location.hostname.includes('usercontent') || window.location.hostname.includes('goog')) {
-      setUser({ email: 'mightyrem@gmail.com', displayName: 'Mário (Modo Teste)' });
-      setLoginMessage("Login Simulado ativado!");
+    if (!auth) {
+      setLoginMessage("⚠️ Erro: Sistema Firebase não configurado. Adicione as chaves no código.");
       setTimeout(() => setLoginMessage(''), 5000);
       return;
     }
-    try { await signInWithPopup(auth, provider); } catch (e) {}
+    
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const loggedInUser = result.user;
+      
+      if (!ALLOWED_ADMINS.includes(loggedInUser.email)) {
+        // Bloquear acesso na hora e destruir a sessão do Google dessa pessoa
+        await signOut(auth);
+        setLoginMessage("❌ Não tem permissões para fazer login. Qualquer dúvida entre em contacto com o admin.");
+        setTimeout(() => setLoginMessage(''), 7000);
+      } else {
+        setLoginMessage("✅ Bem-vindo ao painel, Mário!");
+        setTimeout(() => setLoginMessage(''), 3000);
+      }
+    } catch (error) {
+      console.error("Erro no login:", error);
+      setLoginMessage("❌ Ocorreu um erro ao tentar fazer login.");
+      setTimeout(() => setLoginMessage(''), 5000);
+    }
   }, []);
 
   const handleLogout = useCallback(async () => {
@@ -676,7 +680,7 @@ export default function App() {
     if (view === 'admin') setView('shop');
   }, [view]);
 
-  // -- Funções de Carrinho Memoizadas (Evitam Re-renders Visuais) --
+  // -- Funções de Carrinho Memoizadas --
   const addToCart = useCallback((product, quantity, type) => {
     if (quantity <= 0) return;
     setCart(prev => {
@@ -715,7 +719,7 @@ export default function App() {
       <BrandStyles />
       {loginMessage && (
         <div className="fixed top-24 left-1/2 transform -translate-x-1/2 z-[100] bg-[#14532D] text-[#FFFCF2] px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 text-sm animate-fade-in border border-[#84CC16]">
-          <Sparkles size={18} className="text-[#84CC16]" /><span className="font-medium">{loginMessage}</span>
+          <span className="font-bold">{loginMessage}</span>
         </div>
       )}
 
