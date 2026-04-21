@@ -9,34 +9,22 @@ import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChang
 
 const apiKey = ""; // A chave do Gemini é injetada automaticamente
 
-// --- SETUP FIREBASE AUTH ---
-const firebaseConfig = {
-  apiKey: "AIzaSyCXjyBVLbzojhMmpGJ81BzjmvgqOEILYcI",
-  authDomain: "amplified-alpha-465208-n8.firebaseapp.com",
-  projectId: "amplified-alpha-465208-n8",
-  storageBucket: "amplified-alpha-465208-n8.firebasestorage.app",
-  messagingSenderId: "986465642868",
-  appId: "1:986465642868:web:b084a9c27eda0a5e176421",
-  measurementId: "G-LDGPRLZ8EM"
-};
+// --- SETUP FIREBASE AUTH (COM AS SUAS CHAVES DIRETAS) ---
 let auth, provider;
 try {
-  // ATENÇÃO MÁRIO: Quando colocar as suas chaves do Firebase, coloque-as aqui dentro
-  const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-    // Exemplo de como devem ficar as suas chaves (remova os // e preencha):
-    // apiKey: "AIzaSy...",
-    // authDomain: "frutario-app.firebaseapp.com",
-    // projectId: "frutario-app",
-    // storageBucket: "frutario-app.appspot.com",
-    // messagingSenderId: "123456789",
-    // appId: "1:123456789:web:abcde"
+  const firebaseConfig = {
+    apiKey: "AIzaSyCXjyBVLbzojhMmpGJ81BzjmvgqOEILYcI",
+    authDomain: "amplified-alpha-465208-n8.firebaseapp.com",
+    projectId: "amplified-alpha-465208-n8",
+    storageBucket: "amplified-alpha-465208-n8.firebasestorage.app",
+    messagingSenderId: "986465642868",
+    appId: "1:986465642868:web:b084a9c27eda0a5e176421",
+    measurementId: "G-LDGPRLZ8EM"
   };
-  
-  if (Object.keys(firebaseConfig).length > 0) {
-    const app = initializeApp(firebaseConfig);
-    auth = getAuth(app);
-    provider = new GoogleAuthProvider();
-  }
+
+  const app = initializeApp(firebaseConfig);
+  auth = getAuth(app);
+  provider = new GoogleAuthProvider();
 } catch(e) {
   console.error("Erro ao inicializar Firebase", e);
 }
@@ -633,7 +621,6 @@ export default function App() {
   useEffect(() => {
     if (!auth) return;
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      // Dupla verificação de segurança: Se um intruso tiver um cookie guardado, é ejetado!
       if (currentUser && !ALLOWED_ADMINS.includes(currentUser.email)) {
         signOut(auth);
         setUser(null);
@@ -658,9 +645,8 @@ export default function App() {
       const loggedInUser = result.user;
       
       if (!ALLOWED_ADMINS.includes(loggedInUser.email)) {
-        // Bloquear acesso na hora e destruir a sessão do Google dessa pessoa
         await signOut(auth);
-        setLoginMessage("❌ Não tem permissões para fazer login. Qualquer dúvida entre em contacto com o admin.");
+        setLoginMessage("❌ Não tem permissões para fazer login. Contacte a administração.");
         setTimeout(() => setLoginMessage(''), 7000);
       } else {
         setLoginMessage("✅ Bem-vindo ao painel, Mário!");
@@ -680,7 +666,6 @@ export default function App() {
     if (view === 'admin') setView('shop');
   }, [view]);
 
-  // -- Funções de Carrinho Memoizadas --
   const addToCart = useCallback((product, quantity, type) => {
     if (quantity <= 0) return;
     setCart(prev => {
